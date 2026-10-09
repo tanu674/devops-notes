@@ -1,1 +1,450 @@
+# Day 1: Linux + Git/GitHub for DevOps
 
+**Tools used:** Linux, Linux Terminal, Bash, Git, GitHub, SSH, curl
+
+## 1. Concepts
+
+### 1.1 Introduction to Linux in DevOps
+
+Linux is an open-source operating system widely used to run servers, cloud infrastructure, containers, and DevOps tools.
+
+In DevOps, Linux is used to:
+- Manage application files and directories.
+- Install and configure software.
+- Start, stop, and monitor processes and services.
+- Configure permissions and users.
+- Troubleshoot application and network issues.
+- Access remote servers securely through SSH.
+- Run automation scripts and CI/CD jobs.
+
+Common Linux distributions include Ubuntu, Debian, Fedora, Red Hat Enterprise Linux (RHEL), and Amazon Linux.
+
+### 1.2 Linux Filesystem
+
+Linux uses a hierarchical filesystem that starts from the root directory `/`.
+
+| Directory | Purpose |
+|---|---|
+| `/` | Root of the entire filesystem |
+| `/home` | Home directories of regular users |
+| `/root` | Home directory of the root user |
+| `/etc` | System and application configuration files |
+| `/var` | Variable data, including logs and caches |
+| `/var/log` | System and application log files |
+| `/tmp` | Temporary files |
+| `/usr` | Applications, libraries, and shared resources |
+| `/opt` | Optional or third-party application software |
+| `/dev` | Device files |
+| `/proc` | Virtual filesystem exposing process and kernel information |
+| `/run` | Runtime data for the current boot |
+| `/mnt` | Common mount point for temporarily mounted filesystems |
+
+**Absolute path:** A complete path beginning with `/`.
+
+Example: `/home/user/project/app.py`
+
+**Relative path:** A path interpreted from the current working directory.
+
+Example: `project/app.py`
+
+Special path symbols:
+
+| Symbol | Meaning |
+|---|---|
+| `.` | Current directory |
+| `..` | Parent directory |
+| `~` | Current user's home directory |
+| `/` | Root directory |
+
+### 1.3 Files and Directories
+
+Linux provides commands to create, inspect, copy, move, rename, and remove files and directories.
+
+- `pwd` displays the current working directory.
+- `ls` lists directory contents.
+- `mkdir` creates directories.
+- `touch` creates an empty file if it does not exist.
+- `cp` copies files or directories.
+- `mv` moves or renames files.
+- `rm` removes files.
+- `find` searches for files and directories.
+
+Be careful with `rm`, especially when using recursive or force options. Deleted files may not be recoverable.
+
+### 1.4 Linux Users, Groups, and Permissions
+
+Linux uses users and groups to control access to files, directories, and system resources.
+
+Every file or directory has permissions for three categories:
+
+- **User (u):** The file owner.
+- **Group (g):** Members of the assigned group.
+- **Others (o):** Everyone else.
+
+The three basic permissions are:
+
+| Permission | Symbol | Numeric value | Meaning |
+|---|---|---:|---|
+| Read | `r` | 4 | Read file contents or list directory entries |
+| Write | `w` | 2 | Modify a file or create/remove directory entries |
+| Execute | `x` | 1 | Execute a file or traverse a directory |
+
+Example permission:
+
+`rwxr-xr--`
+
+This means:
+- Owner: read, write, execute.
+- Group: read, execute.
+- Others: read only.
+
+Numeric permissions are calculated by adding values:
+
+| Permission | Calculation | Value |
+|---|---|---:|
+| `rwx` | 4 + 2 + 1 | 7 |
+| `rw-` | 4 + 2 | 6 |
+| `r-x` | 4 + 1 | 5 |
+| `r--` | 4 | 4 |
+| `---` | No permissions | 0 |
+
+For example, `chmod 754 script.sh` gives the owner `rwx`, the group `r-x`, and others `r--`.
+
+**Important:** Execute permission on a directory allows traversal through it. Directory permissions behave differently from regular file permissions.
+
+### 1.5 sudo and Administrative Access
+
+`sudo` allows an authorized user to execute a command with elevated privileges.
+
+Examples of tasks that may require elevated privileges:
+- Installing system packages.
+- Editing protected configuration files.
+- Managing system services.
+- Changing ownership of system files.
+
+Use `sudo` only when required. Avoid running unfamiliar commands with elevated privileges.
+
+### 1.6 Processes and Services
+
+A **process** is a running instance of a program.
+
+A **service** is a background application or system component that provides functionality, such as SSH or a web server.
+
+Linux process management helps identify:
+- Which applications are running.
+- Their process IDs (PIDs).
+- Resource consumption.
+- Processes that are unresponsive.
+
+On many Linux distributions, `systemd` manages services through `systemctl`.
+
+Not every Linux environment uses `systemd`. Containers and minimal environments may use a different process or service management approach.
+
+### 1.7 Environment Variables
+
+Environment variables are named values available to processes. They commonly store configuration such as paths, runtime settings, and application environment names.
+
+Examples:
+- `PATH`: Directories searched for executable commands.
+- `HOME`: User's home directory.
+- `USER`: Current username in many environments.
+- `APP_ENV`: An application-specific environment name.
+
+Environment variables are useful for separating application configuration from source code.
+
+Never place passwords, API keys, or tokens in committed files.
+
+### 1.8 Pipes, grep, and Log Analysis
+
+A pipe (`|`) sends the standard output of one command to the standard input of another command.
+
+Example:
+
+`ps aux | grep nginx`
+
+This searches process output for lines containing `nginx`.
+
+`grep` searches text for matching patterns and is useful for troubleshooting logs.
+
+Linux logs help identify:
+- Application startup failures.
+- Permission errors.
+- Connection failures.
+- Service crashes.
+- Configuration mistakes.
+
+Common locations include `/var/log/`, but log locations depend on the application and distribution. On systemd-based systems, `journalctl` reads the system journal.
+
+### 1.9 Basic Networking
+
+Networking commands help verify connectivity and diagnose DNS, HTTP, and port-related problems.
+
+Important concepts:
+
+- **IP address:** Identifies a network interface on an IP network.
+- **DNS:** Translates domain names into IP addresses.
+- **Port:** Identifies a service endpoint on a host.
+- **HTTP status code:** Indicates the outcome of an HTTP request.
+- **Listening port:** A port on which an application waits for connections.
+
+Useful tools include `ip`, `ping`, `ss`, `curl`, and `getent`.
+
+A successful ping does not guarantee that an application is reachable. Firewalls and network policies may block ICMP traffic even when a service is available.
+
+### 1.10 SSH and Secure Remote Access
+
+SSH (Secure Shell) provides encrypted remote access to another system.
+
+Example:
+
+`ssh username@server-ip`
+
+SSH is commonly used to administer Linux servers, cloud virtual machines, and deployment environments.
+
+SSH authentication commonly uses:
+- Password authentication, where permitted.
+- Public-key authentication.
+
+With public-key authentication:
+- The private key remains on the client.
+- The corresponding public key is placed in the server user's `~/.ssh/authorized_keys` file.
+- The private key must never be shared or committed to GitHub.
+
+### 1.11 Introduction to Git
+
+Git is a distributed version control system. It tracks changes to files and allows developers to work on different versions of a project.
+
+Git helps teams:
+- Track source code changes.
+- Review previous versions.
+- Work on separate branches.
+- Merge changes.
+- Collaborate through pull requests on platforms such as GitHub.
+
+Important Git concepts:
+
+| Term | Meaning |
+|---|---|
+| Repository | Project files and their version history |
+| Working tree | Files currently checked out for editing |
+| Staging area | Changes selected for the next commit |
+| Commit | A recorded snapshot of selected changes |
+| Branch | A movable reference to a line of development |
+| Merge | Combines changes from different development histories |
+| Remote | A repository hosted elsewhere |
+| Tag | A named reference commonly used to mark a release |
+| HEAD | The current checked-out commit or reference |
+
+### 1.12 Git Workflow
+
+A typical Git workflow is:
+
+1. Edit files in the working tree.
+2. Inspect changes using `git status` and `git diff`.
+3. Stage selected files using `git add`.
+4. Create a commit using `git commit`.
+5. Push commits to a remote repository using `git push`.
+6. Open a pull request on GitHub when review is required.
+7. Review and merge the changes according to the repository's workflow.
+
+Git and GitHub are different:
+- Git manages version history.
+- GitHub hosts Git repositories and provides collaboration features such as issues, pull requests, and reviews.
+
+### 1.13 Branches and Pull Requests
+
+A branch allows work to be developed separately from another branch, such as `main`.
+
+A pull request (PR) asks teammates to review and integrate proposed changes.
+
+A professional workflow typically involves:
+- Creating an issue describing the task.
+- Creating a branch for the work.
+- Making small, meaningful commits.
+- Pushing the branch.
+- Opening a pull request.
+- Reviewing code and checks.
+- Resolving feedback and merge conflicts.
+- Merging the PR when approved.
+
+Merge conflicts occur when Git cannot automatically reconcile overlapping changes. They must be reviewed and resolved before the merge can complete.
+
+### 1.14 Repository Hygiene
+
+A well-maintained repository should contain only relevant project files and documentation.
+
+**README.md**
+- Explains the project's purpose.
+- Documents prerequisites and setup instructions.
+- Shows how to run or test the application.
+- Documents relevant commands.
+
+**.gitignore**
+- Specifies intentionally untracked files that Git should ignore.
+- Common examples include local environment files, generated output, and dependency directories.
+- It does not automatically remove files already tracked by Git.
+
+**.env.example**
+- Documents the environment variable names an application needs.
+- Contains safe example values or placeholders.
+- Must not contain real credentials.
+
+**Commit messages**
+- Should be concise and explain the change.
+- Examples: `Add Linux permission notes` or `Fix API startup configuration`.
+
+**Issue linking**
+- GitHub issues track tasks, defects, and improvements.
+- Pull requests can reference issues to connect implementation work with its purpose.
+- Keywords such as `Closes #12` can automatically close a linked issue when the PR is merged into the repository's default branch, subject to GitHub's supported workflow.
+
+---
+
+## 2. Key Commands
+
+### 2.1 Filesystem Navigation
+
+```bash
+pwd                         # Display the current directory
+ls                          # List files and directories
+ls -la                      # Show hidden files and detailed information
+cd /etc                     # Move to /etc
+cd ..                       # Move to the parent directory
+cd ~                        # Move to the current user's home directory
+
+
+2.2 File and Directory Operations
+mkdir devops-lab            # Create a directory
+mkdir -p project/logs       # Create nested directories
+touch notes.md              # Create an empty file if needed
+cat notes.md                # Display the file contents
+less notes.md               # Read a file page by page
+cp notes.md notes-backup.md # Copy a file
+mv notes-backup.md backup.md # Rename a file
+find . -name "*.md"         # Find Markdown files under the current directory
+
+To remove files, first inspect the target:
+
+ls -l notes.md              # Confirm the target file
+rm notes.md                 # Delete the specified file
+
+For directories, rmdir removes an empty directory. Recursive deletion with rm -r can remove many files, so inspect the path before using it.
+
+2.3 Users, Groups, and Permissions
+whoami                      # Display the current username
+id                          # Display user ID and group memberships
+groups                      # Display the current user's groups
+ls -l                       # Inspect ownership and permissions
+chmod 644 notes.md          # Owner can read/write; others can read
+chmod 755 script.sh         # Owner has full permissions; others can read/execute
+chmod u+x script.sh         # Add execute permission for the owner
+
+Ownership changes generally require appropriate privileges:
+
+sudo chown username:groupname file.txt  # Change owner and group; replace placeholders
+
+Do not change ownership or permissions on system directories without understanding the impact.
+
+2.4 Processes and Services
+ps aux                      # List processes
+ps aux | grep nginx         # Search the process list for nginx
+top                         # Monitor running processes
+pgrep -a nginx              # Find matching process IDs and command lines
+
+On a system using systemd:
+
+systemctl status nginx      # Check service status
+sudo systemctl start nginx  # Start the service
+sudo systemctl stop nginx   # Stop the service
+sudo systemctl restart nginx # Restart the service
+sudo systemctl enable nginx # Enable automatic startup at boot
+
+Replace nginx with the actual service name. These examples assume that the service exists and that the current user has the required permissions.
+
+For a process that must be stopped, identify its PID first:
+
+kill PID                    # Request graceful termination; replace PID with a real process ID
+
+Use forceful termination only as a last resort.
+
+2.5 Environment Variables
+echo "$HOME"                # Display the home directory
+echo "$PATH"                # Display executable search paths
+export APP_ENV=development  # Set an environment variable for this shell and child processes
+printenv APP_ENV            # Display the variable if it is set
+unset APP_ENV               # Remove the variable from this shell
+
+Shell variables exported this way do not automatically persist across new terminal sessions.
+
+2.6 Pipes, grep, and Logs
+ps aux | grep nginx                     # Search process output
+grep -n "ERROR" application.log         # Find ERROR lines with line numbers
+grep -i "failed" application.log        # Search case-insensitively
+tail -n 50 application.log              # Display the last 50 lines
+tail -f application.log                 # Follow new log entries
+
+On a system using systemd:
+
+journalctl -u nginx                     # Read logs for a service
+journalctl -u nginx -n 50               # Display the latest 50 entries
+journalctl -u nginx -f                  # Follow new service log entries
+2.7 Networking and HTTP
+ip addr                                 # Display network interfaces and IP addresses
+ip route                                # Display routing information
+ping -c 4 8.8.8.8                       # Send four ICMP echo requests on Linux
+getent hosts example.com                # Resolve a hostname on systems with getent
+ss -tuln                                # List listening TCP/UDP sockets on Linux
+curl -I https://example.com             # Inspect HTTP response headers
+curl -v https://example.com             # Display detailed connection information
+
+ip, ss, and getent are commonly available on Linux but may not be installed or available in all minimal environments. On macOS, alternatives include ifconfig, netstat, and dscacheutil -q host -a name example.com.
+
+2.8 SSH Commands
+ssh username@server-ip                  # Connect to a remote host
+ssh -i ~/.ssh/id_ed25519 username@server-ip # Select a private key
+ssh-keygen -t ed25519 -C "devops-training" # Generate an SSH key pair
+
+Use the actual username and server address. Protect the private key with appropriate permissions and never upload it to GitHub.
+
+2.9 Git Basics
+git --version                            # Display the installed Git version
+git clone https://github.com/OWNER/REPO.git # Clone a repository
+cd REPO                                  # Enter the cloned repository
+git status                               # Inspect the working tree
+git diff                                 # Inspect unstaged changes
+git add filename.md                     # Stage a selected file
+git diff --cached                       # Inspect staged changes
+git commit -m "Add Linux training notes" # Create a commit
+git log --oneline                       # Display concise commit history
+
+Replace OWNER, REPO, and filenames with actual values.
+
+2.10 Branching and Merging
+git branch                              # List local branches
+git switch -c feature/linux-notes       # Create and switch to a branch
+git status                              # Check branch and working tree state
+git add filename.md                     # Stage the intended change
+git commit -m "Document Linux commands" # Commit the change
+git switch main                         # Switch to main
+git merge feature/linux-notes           # Merge the feature branch into main
+git branch -d feature/linux-notes       # Delete a merged local branch if no longer needed
+
+Before switching branches or merging, ensure your work is committed or safely preserved.
+
+2.11 Remote Repositories and Tags
+git remote -v                           # Display configured remotes
+git fetch origin                        # Download remote updates without merging
+git branch -a                           # List local and remote-tracking branches
+git push -u origin feature/linux-notes  # Publish a branch and set its upstream
+git tag                                 # List tags
+git tag v1.0.0                          # Create a lightweight tag
+git show v1.0.0                         # Inspect the tag target
+
+Push commands require suitable repository access. Always verify the intended branch and remote before pushing.
+
+2.12 GitHub Pull Request Workflow
+git switch -c docs/linux-notes          # Create a task-specific branch
+git add day-01.md                       # Stage the notes file
+git diff --cached                       # Review the staged changes
+git commit -m "Add Day 1 Linux and Git notes" # Commit the changes
+git push -u origin docs/linux-notes     # Publish the branch
